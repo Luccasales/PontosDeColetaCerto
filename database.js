@@ -9,6 +9,7 @@ const criarBanco = async() => {
         driver: sqlite3.Database
     })
 
+    await db.get("PRAGMA foreign_keys = ON")
 
     await db.exec(`
         -- Tabela de cadastro de pontos de abrigos para coleta
@@ -22,8 +23,10 @@ const criarBanco = async() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             abrigo_id INTEGER,
             nome_item TEXT,
+            categoria TEXT,
             estoque INTEGER DEFAULT 0,
-            FOREIGN KEY (abrigo_id) REFERENCES abrigos(id)
+            FOREIGN KEY (abrigo_id) REFERENCES abrigos(id),
+            UNIQUE (abrigo_id, nome_item)
 );
 
         CREATE TABLE IF NOT EXISTS doacoes (
