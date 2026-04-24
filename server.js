@@ -17,7 +17,7 @@ const limites ={
 
 
 //Função para calcular a % que está o estoque
- function carlularPorcentagem(total, limite){
+ function calcularPorcentagem(total, limite){
     const porcentagem = (total / limite) * 100
 
     if(porcentagem <= 20) return "critico"
@@ -64,7 +64,22 @@ app.get('/estoque', async (req, res) => {
             GROUP BY abrigos.id, itens.nome_item, itens.categoria
     `)
 
-    res.json(estoque)
+    //status
+    const resultado = estoque.map(item => {
+        const limite = limites[item.categoria] || 10
+        const status = calcularPorcentagem(item.total, limite)
+
+        return{
+            abrigo_id: item.abrigo_id,
+            nome_abrigo: item.nome_abrigo,
+            nome_item: item.nome_item,
+            categoria: item.categoria,
+            total: item.total,
+            status
+        }
+    })
+
+    res.json(resultado)
 })
 
 
@@ -79,7 +94,20 @@ app.get('/estoque/:abrigo_id', async (req, res) => {
         WHERE abrigo_id = ?
     `, [abrigo_id])
 
-    res.json(estoque)
+    //status
+    const resultado = estoque.map(item =>{
+        const limite = limites[item.categoria] || 10
+        const status = calcularPorcentagem(item.estoque, limite)
+
+        return {
+            nome_item: item.nome_item,
+            categoria: item.categoria,
+            estoque: item.estoque,
+            status
+        }
+    })
+
+    res.json(resultado)
 })
 
 app.post('/doacoes', async (req, res) => {
