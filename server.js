@@ -36,7 +36,7 @@ app.get('/', async (req, res) => {
             <p> Para ver estoque total /estoque </p>
             <p> Para ver estoque por abrigo /estoque/:abrigo </p>
             <p>para fazer doação /doacoes </p>
-            <p> Para realizar retiradas de itens /retiradas </p>
+            <p> Para realizar retiradas de itens /retirada </p>
         </body>
         `)
 })
