@@ -36,6 +36,7 @@ app.get('/', async (req, res) => {
             <p> Para ver estoque total /estoque </p>
             <p> Para ver estoque por abrigo /estoque/:abrigo </p>
             <p>para fazer doação /doacoes </p>
+            <p> Para realizar retiradas de itens /retiradas </p>
         `)
 })
 
@@ -166,6 +167,49 @@ app.post('/doacoes', async (req, res) => {
   }
 })
 
+app.put('/retirada' , async (req, res) => {
+    try {
+        const db = await criarBanco()
+
+        const  {abrigo_id, nome_item, quantidade } = req.body
+
+        if(!abrigo_id || !nome_item || !quantidade){
+            return res.status(400).json({erro: "Preencha todos os dados"})
+        }
+
+        if (quantidade < 0){
+            res.status(400).json({erro: "Impossivel retirar menos que 0"})
+        }
+
+        //Tratamento para o nome sempre ser igual
+        const nomeItemFormatado = nome_item.trim().toLowerCase()
+
+        //Busca no banco de dados
+        const item = await db.get(`
+            SELECT * FROM itens
+            WHERE abrigo_id = ? AND nome_item = ?`,
+            [abrigo_id, nomeItemFormatado])
+
+            if(!item){
+                return res.status(404).json({erro: 'Item não foi encontrado'})
+            }
+
+            if (item.estoque < quantidade){
+                return res.status(400).json({erro: "Estoque insuficiente"})
+            }
+
+            await db.run(`
+                UPDATE itens
+                SET estoque = estoque - ?
+                WHERE id = ?
+                `, [quantidade, item.id])
+
+                res.json({message: 'Item retirado do estoque com sucesso'})
+
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+})
 
 
 app.listen(3000, () => {
